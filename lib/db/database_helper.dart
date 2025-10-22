@@ -71,7 +71,8 @@ class DatabaseHelper {
   Future<void> _insertCards(Database db, List<String> suits, List<int> folderIds) async {
     final ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 
-    // Local asset paths for the cards
+    // Use local asset paths for cards
+    // NOTE: Ensure these files exist in your 'assets/cards/' directory
     final imageUrls = [
       'assets/cards/heart_a.png',
       'assets/cards/spade_a.png',

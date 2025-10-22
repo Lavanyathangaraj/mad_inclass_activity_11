@@ -21,6 +21,7 @@ class _FoldersScreenState extends State<FoldersScreen> {
     _loadFolders();
   }
 
+  // Made this method public so it can be called back from CardsScreen if needed
   Future<void> _loadFolders() async {
     final allFolders = await folderRepo.getAllFolders();
     Map<int, int> counts = {};
@@ -46,17 +47,19 @@ class _FoldersScreenState extends State<FoldersScreen> {
                 final count = folderCardCounts[folder.id!] ?? 0;
                 return ListTile(
                   leading: folder.previewImage != null
-                      ? Image.asset(folder.previewImage!) // <--- Image.asset
+                      ? Image.asset(folder.previewImage!) // Image.asset fix
                       : const Icon(Icons.folder),
                   title: Text(folder.name),
                   subtitle: Text('$count cards'),
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => CardsScreen(folder: folder),
                       ),
                     );
+                    // Reload folders when returning from CardsScreen to update counts/previews
+                    _loadFolders();
                   },
                 );
               },
