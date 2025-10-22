@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'db/database_helper.dart';
+import 'screens/folders_screen.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await DatabaseHelper.instance.database; // initialize DB
+void main() {
   runApp(const MyApp());
 }
 
@@ -13,19 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Demo',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('SQLite Database Example'),
-        ),
-        body: const Center(
-          child: Text(
-            'Database initialized and prepopulated!',
-            style: TextStyle(fontSize: 18),
-          ),
-        ),
+      title: 'Cards App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      home: const FoldersScreen(),
     );
   }
 }
