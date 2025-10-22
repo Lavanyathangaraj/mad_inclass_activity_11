@@ -18,11 +18,16 @@ class DatabaseHelper {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+    );
   }
 
   Future _createDB(Database db, int version) async {
-    // --- Create folders table ---
+    // Create folders table
     await db.execute('''
       CREATE TABLE folders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +37,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // --- Create cards table ---
+    // Create cards table
     await db.execute('''
       CREATE TABLE cards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,73 +51,60 @@ class DatabaseHelper {
       )
     ''');
 
-    // --- Prepopulate folders (4 suits) ---
+    // Insert folders
     final now = DateTime.now().toIso8601String();
     final suits = ['Hearts', 'Spades', 'Diamonds', 'Clubs'];
+    List<int> folderIds = [];
 
     for (var suit in suits) {
-      await db.insert('folders', {
+      int id = await db.insert('folders', {
         'name': suit,
         'createdAt': now,
       });
+      folderIds.add(id);
     }
 
-    // --- Prepopulate cards (52 total, 13 per suit) ---
-    await _insertCards(db);
+    // Insert cards
+    await _insertCards(db, suits, folderIds);
   }
 
-  Future<void> _insertCards(Database db) async {
-    // Example image URLs (you can replace these with your own later)
+  Future<void> _insertCards(Database db, List<String> suits, List<int> folderIds) async {
+    final ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+    // Local asset paths for the cards
     final imageUrls = [
-      'https://upload.wikimedia.org/wikipedia/commons/5/57/Playing_card_heart_A.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/d/d3/Playing_card_spade_A.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/2/22/Playing_card_diamond_A.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/5/50/Playing_card_club_A.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/2/25/Playing_card_heart_K.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/2/25/Playing_card_spade_K.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/f/f2/Playing_card_diamond_K.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/8/80/Playing_card_club_K.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/3/36/Playing_card_heart_Q.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/0/0d/Playing_card_spade_Q.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/9/94/Playing_card_diamond_Q.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/3/3e/Playing_card_club_Q.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/2/21/Playing_card_heart_J.svg',
-      'https://upload.wikimedia.org/wikipedia/commons/b/bd/Playing_card_spade_J.svg',
+      'assets/cards/heart_a.png',
+      'assets/cards/spade_a.png',
+      'assets/cards/diamond_a.png',
+      'assets/cards/club_a.png',
+      'assets/cards/heart_k.png',
+      'assets/cards/spade_k.png',
+      'assets/cards/diamond_k.png',
+      'assets/cards/club_k.png',
+      'assets/cards/heart_q.png',
+      'assets/cards/spade_q.png',
+      'assets/cards/diamond_q.png',
+      'assets/cards/club_q.png',
+      'assets/cards/heart_j.png',
+      'assets/cards/spade_j.png',
     ];
 
-    final suits = ['Hearts', 'Spades', 'Diamonds', 'Clubs'];
-    final ranks = [
-      'A',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-      'J',
-      'Q',
-      'K'
-    ];
-
-    final now = DateTime.now().toIso8601String();
     int imageIndex = 0;
+    final now = DateTime.now().toIso8601String();
 
-    for (var suit in suits) {
+    for (int i = 0; i < suits.length; i++) {
+      final suit = suits[i];
+      final folderId = folderIds[i];
+
       for (var rank in ranks) {
-        final name = '$rank of $suit';
-        final imageUrl = imageUrls[imageIndex % imageUrls.length];
-        imageIndex++;
-
         await db.insert('cards', {
-          'name': name,
+          'name': '$rank of $suit',
           'suit': suit,
-          'imageUrl': imageUrl,
+          'imageUrl': imageUrls[imageIndex % imageUrls.length],
           'createdAt': now,
-          'folderId': suits.indexOf(suit) + 1, // folder IDs start at 1
+          'folderId': folderId,
         });
+        imageIndex++;
       }
     }
   }

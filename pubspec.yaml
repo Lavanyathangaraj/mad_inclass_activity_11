@@ -5,24 +5,27 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: '>=3.9.0 <4.0.0' # Adjusted SDK constraint to be more conventional
 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
 
-  # --- Added dependencies for your app ---
-  sqflite: ^2.0.0+3
-  path: ^1.8.0
-  image_picker: ^0.8.4+4
-  http: ^0.13.3
-  flutter_image: ^4.1.13
+  # --- Added core dependencies for your app ---
+  sqflite: ^2.3.3 # Updated version
+  path: ^1.9.0    # Updated version
+  image_picker: ^1.1.2 # Updated version (if you plan to use it)
+  # http, flutter_image removed as they're not needed for local assets
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^3.0.0 # Updated version
 
 flutter:
   uses-material-design: true
+
+  # --- CORRECTED: Asset declaration moved here under the 'flutter' key ---
+  assets:
+    - assets/cards/
